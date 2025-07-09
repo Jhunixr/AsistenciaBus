@@ -17,12 +17,12 @@ const AttendanceSummaryComponent: React.FC<AttendanceSummaryProps> = ({ summary 
       </h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
           <div className="flex items-center justify-center mb-2">
-            <Users className="w-8 h-8 text-blue-600" />
+            <Users className="w-8 h-8 text-red-800" />
           </div>
-          <p className="text-2xl font-bold text-blue-800">{summary.total}</p>
-          <p className="text-sm text-blue-600">Total Estudiantes</p>
+          <p className="text-2xl font-bold text-red-800">{summary.total}</p>
+          <p className="text-sm text-red-600">Total Estudiantes</p>
         </div>
 
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
@@ -41,12 +41,12 @@ const AttendanceSummaryComponent: React.FC<AttendanceSummaryProps> = ({ summary 
           <p className="text-sm text-red-600">Ausentes</p>
         </div>
 
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+        <div className="bg-red-100 border border-red-300 rounded-lg p-4 text-center">
           <div className="flex items-center justify-center mb-2">
-            <div className="text-2xl font-bold text-purple-600">%</div>
+            <div className="text-2xl font-bold text-red-800">%</div>
           </div>
-          <p className="text-2xl font-bold text-purple-800">{attendanceRate}%</p>
-          <p className="text-sm text-purple-600">Asistencia</p>
+          <p className="text-2xl font-bold text-red-800">{attendanceRate}%</p>
+          <p className="text-sm text-red-600">Asistencia</p>
         </div>
       </div>
 

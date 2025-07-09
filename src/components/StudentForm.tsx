@@ -119,13 +119,13 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <UserPlus className="w-6 h-6 mr-2 text-green-600" />
+          <UserPlus className="w-6 h-6 mr-2 text-red-800" />
           Agregar Estudiante Manualmente
         </h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 flex items-center font-medium shadow-lg"
+            className="bg-gradient-to-r from-red-800 to-red-900 text-white px-6 py-2 rounded-lg hover:from-red-900 hover:to-red-950 transition-all duration-200 flex items-center font-medium shadow-lg"
           >
             <UserPlus className="w-4 h-4 mr-2" />
             Agregar Estudiante
@@ -145,7 +145,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
                 id="nombre"
                 value={formData.nombre}
                 onChange={(e) => handleInputChange('nombre', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 required
                 placeholder="Ingresa los nombres"
               />
@@ -159,7 +159,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
                 id="apellido"
                 value={formData.apellido}
                 onChange={(e) => handleInputChange('apellido', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 required
                 placeholder="Ingresa los apellidos"
               />
@@ -179,7 +179,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                   errors.dni 
                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                 }`}
                 placeholder="12345678"
                 maxLength={8}
@@ -203,7 +203,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                   errors.telefono 
                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                 }`}
                 placeholder="987654321"
                 maxLength={9}
@@ -219,8 +219,8 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-green-600 mt-0.5 mr-2" />
-              <div className="text-sm text-green-800">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-2" />
+              <div className="text-sm text-red-800">
                 <p className="font-semibold mb-1">Información importante:</p>
                 <ul className="space-y-1">
                   <li>• El estudiante será marcado automáticamente como <strong>presente</strong></li>
@@ -239,7 +239,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
               className={`flex-1 flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                 errors.dni || errors.telefono
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg'
+                  : 'bg-gradient-to-r from-red-800 to-red-900 text-white hover:from-red-900 hover:to-red-950 shadow-lg'
               }`}
             >
               <Save className="w-4 h-4 mr-2" />
@@ -258,10 +258,10 @@ const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudent
       )}
 
       {!showForm && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-2" />
-            <div className="text-sm text-blue-800">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-2" />
+            <div className="text-sm text-red-800">
               <p className="font-semibold mb-1">Agregar estudiantes manualmente:</p>
               <ul className="space-y-1">
                 <li>• Ideal para estudiantes que no están en el archivo Excel</li>
