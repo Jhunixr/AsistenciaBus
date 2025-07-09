@@ -259,9 +259,11 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="bg-gradient-to-br from-blue-600 to-orange-500 p-3 rounded-xl mr-4">
-                <GraduationCap className="w-10 h-10 text-white" />
-              </div>
+              <img 
+                src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+                alt="UTP Logo" 
+                className="w-16 h-16 rounded-xl mr-4 shadow-lg border-2 border-white"
+              />
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
                   Sistema de Asistencia UTP
@@ -330,9 +332,11 @@ function App() {
 
         {!currentList && (
           <div className="text-center py-16">
-            <div className="bg-gradient-to-br from-blue-600 to-orange-500 p-6 rounded-full w-32 h-32 mx-auto mb-8 flex items-center justify-center">
-              <GraduationCap className="w-16 h-16 text-white" />
-            </div>
+            <img 
+              src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+              alt="UTP Logo" 
+              className="w-32 h-32 rounded-full mx-auto mb-8 shadow-xl border-4 border-white"
+            />
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Bienvenido al Sistema de Asistencia UTP
             </h2>
@@ -359,9 +363,11 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-gradient-to-br from-blue-600 to-orange-500 p-2 rounded-lg mr-3">
-                <GraduationCap className="w-6 h-6 text-white" />
-              </div>
+              <img 
+                src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+                alt="UTP Logo" 
+                className="w-8 h-8 rounded-lg mr-3 shadow-md"
+              />
               <span className="text-lg font-semibold text-gray-800">Apoyos UTP</span>
             </div>
             <p className="text-sm text-gray-600">
