@@ -260,8 +260,8 @@ function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img 
-                src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
-                alt="UTP Logo" 
+                src="https://s3.amazonaws.com/evaluar-test-media-bucket/COMPANY/image/53/COMPANY_a2e27536-28be-4b70-b214-3d1e80bf5453_67c9518f-7304-4b55-b19e-c3fe3e868a7e.jpeg" 
+                alt="Logo" 
                 className="w-16 h-16 rounded-xl mr-4 shadow-lg border-2 border-white"
               />
               <div>
@@ -333,8 +333,8 @@ function App() {
         {!currentList && (
           <div className="text-center py-16">
             <img 
-              src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
-              alt="UTP Logo" 
+              src="https://s3.amazonaws.com/evaluar-test-media-bucket/COMPANY/image/53/COMPANY_a2e27536-28be-4b70-b214-3d1e80bf5453_67c9518f-7304-4b55-b19e-c3fe3e868a7e.jpeg" 
+              alt="Logo" 
               className="w-32 h-32 rounded-full mx-auto mb-8 shadow-xl border-4 border-white"
             />
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
@@ -364,8 +364,8 @@ function App() {
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <img 
-                src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
-                alt="UTP Logo" 
+                src="https://s3.amazonaws.com/evaluar-test-media-bucket/COMPANY/image/53/COMPANY_a2e27536-28be-4b70-b214-3d1e80bf5453_67c9518f-7304-4b55-b19e-c3fe3e868a7e.jpeg" 
+                alt="Logo" 
                 className="w-8 h-8 rounded-lg mr-3 shadow-md"
               />
               <span className="text-lg font-semibold text-gray-800">Apoyos UTP</span>
