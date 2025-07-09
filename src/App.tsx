@@ -260,7 +260,7 @@ function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img 
-                src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+                src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
                 alt="UTP Logo" 
                 className="w-16 h-16 rounded-xl mr-4 shadow-lg border-2 border-white"
               />
@@ -333,7 +333,7 @@ function App() {
         {!currentList && (
           <div className="text-center py-16">
             <img 
-              src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+              src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
               alt="UTP Logo" 
               className="w-32 h-32 rounded-full mx-auto mb-8 shadow-xl border-4 border-white"
             />
@@ -364,7 +364,7 @@ function App() {
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <img 
-                src="https://i.scdn.co/image/ab6765630000ba8af770691237911d7e512de37c" 
+                src="https://proveedoresutp.utp.edu.pe/img/logo-utp.d277c146.png" 
                 alt="UTP Logo" 
                 className="w-8 h-8 rounded-lg mr-3 shadow-md"
               />
