@@ -62,7 +62,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
       <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-        <FileSpreadsheet className="w-6 h-6 mr-2 text-green-600" />
+        <FileSpreadsheet className="w-6 h-6 mr-2 text-red-800" />
         Cargar Estudiantes desde Excel
       </h2>
 
@@ -108,8 +108,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
       <div
         className={`
           border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200
-          ${dragActive ? 'border-blue-500 bg-blue-50 scale-105' : 'border-gray-300'}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-400 hover:bg-blue-50 hover:scale-105'}
+          ${dragActive ? 'border-red-500 bg-red-50 scale-105' : 'border-gray-300'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-400 hover:bg-red-50 hover:scale-105'}
         `}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -128,13 +128,13 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
 
         {isProcessing ? (
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-800 mb-4"></div>
             <p className="text-lg font-medium text-gray-700">Procesando archivo...</p>
             <p className="text-sm text-gray-500 mt-1">Analizando formato y cargando estudiantes</p>
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="bg-gradient-to-br from-blue-500 to-green-500 p-4 rounded-full mb-4">
+            <div className="bg-gradient-to-br from-red-800 to-red-600 p-4 rounded-full mb-4">
               <Upload className="w-12 h-12 text-white" />
             </div>
             <p className="text-xl font-semibold text-gray-700 mb-2">

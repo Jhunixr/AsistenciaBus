@@ -47,7 +47,7 @@ const ListManager: React.FC<ListManagerProps> = ({
         <div className="flex space-x-2">
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center text-sm font-medium"
+            className="bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-900 transition-colors flex items-center text-sm font-medium"
           >
             <Plus className="w-4 h-4 mr-1" />
             Nueva Lista
@@ -55,7 +55,7 @@ const ListManager: React.FC<ListManagerProps> = ({
           {lists.length > 0 && (
             <button
               onClick={() => setShowLists(!showLists)}
-              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center text-sm font-medium"
+              className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition-colors flex items-center text-sm font-medium"
             >
               <List className="w-4 h-4 mr-1" />
               Ver Listas ({lists.length})
@@ -65,10 +65,10 @@ const ListManager: React.FC<ListManagerProps> = ({
       </div>
 
       {currentList && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <h3 className="font-semibold text-blue-800 mb-1">Lista Activa:</h3>
-          <p className="text-blue-700">{currentList.nombre}</p>
-          <div className="flex items-center text-sm text-blue-600 mt-1 space-x-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <h3 className="font-semibold text-red-800 mb-1">Lista Activa:</h3>
+          <p className="text-red-700">{currentList.nombre}</p>
+          <div className="flex items-center text-sm text-red-600 mt-1 space-x-4">
             <span className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
               {currentList.estudiantes.length} estudiantes
@@ -94,7 +94,7 @@ const ListManager: React.FC<ListManagerProps> = ({
             />
             <button
               type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+             className="bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-900 transition-colors font-medium"
             >
               Crear
             </button>
@@ -121,7 +121,7 @@ const ListManager: React.FC<ListManagerProps> = ({
               className={`
                 p-3 border rounded-lg cursor-pointer transition-colors
                 ${currentList?.id === list.id 
-                  ? 'bg-blue-100 border-blue-300' 
+                  ? 'bg-red-100 border-red-300' 
                   : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                 }
               `}
