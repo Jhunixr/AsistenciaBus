@@ -86,7 +86,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200" id="student-table">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4 md:mb-0 flex items-center">
-          <UserCheck className="w-6 h-6 mr-2 text-blue-600" />
+          <UserCheck className="w-6 h-6 mr-2 text-red-800" />
           Lista de Asistencia ({filteredAndSortedStudents.length} estudiantes)
         </h2>
         
@@ -107,7 +107,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
               onClick={() => handleSort('original')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                 sortBy === 'original' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                  ? 'bg-red-100 text-red-700 border border-red-300' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               title="Orden original del archivo"
@@ -125,7 +125,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
               onClick={() => handleSort('apellido')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                 sortBy === 'apellido' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                  ? 'bg-red-100 text-red-700 border border-red-300' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -175,7 +175,7 @@ const StudentTable: React.FC<StudentTableProps> = ({
                 </td>
                 <td className="py-4 px-3 text-center">
                   {student.esManual ? (
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                       <UserPlus className="w-3 h-3 mr-1" />
                       Manual
                     </div>
@@ -234,8 +234,8 @@ const StudentTable: React.FC<StudentTableProps> = ({
 
       <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex items-start">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
+          <Info className="w-5 h-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" />
+          <div className="text-sm text-red-800">
             <p className="font-semibold mb-1">Instrucciones:</p>
             <ul className="space-y-1">
               <li>• Haz clic en los botones de asistencia para cambiar entre presente/ausente</li>
