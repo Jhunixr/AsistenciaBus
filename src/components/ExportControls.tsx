@@ -73,7 +73,7 @@ const ExportControls: React.FC<ExportControlsProps> = ({
             flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors
             ${students.length === 0 || isExporting
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-red-800 text-white hover:bg-red-900'
+              : 'bg-green-600 text-white hover:bg-green-700'
             }
           `}
         >
@@ -92,7 +92,7 @@ const ExportControls: React.FC<ExportControlsProps> = ({
             flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors
             ${students.length === 0 || isExporting
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-red-700 text-white hover:bg-red-800'
+              : 'bg-red-600 text-white hover:bg-red-700'
             }
           `}
         >
