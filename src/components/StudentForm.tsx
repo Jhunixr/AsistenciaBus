@@ -1,279 +1,168 @@
 import React, { useState } from 'react';
-import { UserPlus, Save, X, AlertCircle } from 'lucide-react';
-import { Student } from '../types';
+import { supabase } from '../utils/supabaseClient';
+import toast from 'react-hot-toast';
 
 interface StudentFormProps {
-  onAddStudent: (student: Omit<Student, 'id' | 'fechaCreacion'>) => void;
-  existingStudents: Student[];
+  listaId: string;
+  onAddLocalStudent?: (student: any) => void;
+  onStudentAdded?: () => void;
 }
 
-const StudentForm: React.FC<StudentFormProps> = ({ onAddStudent, existingStudents }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    dni: '',
-    telefono: ''
-  });
-  const [errors, setErrors] = useState({
-    dni: '',
-    telefono: ''
-  });
+const StudentForm: React.FC<StudentFormProps> = ({ listaId, onAddLocalStudent, onStudentAdded }) => {
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [dni, setDni] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [dniError, setDniError] = useState('');
+  const [telefonoError, setTelefonoError] = useState('');
 
-  const validateDNI = (dni: string): string => {
-    if (!dni.trim()) return ''; // DNI es opcional
-    
-    // Remover espacios y caracteres no numéricos
-    const cleanDNI = dni.replace(/\D/g, '');
-    
-    if (cleanDNI.length !== 8) {
-      return 'El DNI debe tener exactamente 8 dígitos';
-    }
-    
-    return '';
-  };
-
-  const validateTelefono = (telefono: string): string => {
-    if (!telefono.trim()) return ''; // Teléfono es opcional
-    
-    // Remover espacios y caracteres no numéricos
-    const cleanTelefono = telefono.replace(/\D/g, '');
-    
-    if (cleanTelefono.length !== 9) {
-      return 'El teléfono debe tener exactamente 9 dígitos';
-    }
-    
-    return '';
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
-    
-    // Validar en tiempo real
-    if (field === 'dni') {
-      const error = validateDNI(value);
-      setErrors(prev => ({ ...prev, dni: error }));
-    } else if (field === 'telefono') {
-      const error = validateTelefono(value);
-      setErrors(prev => ({ ...prev, telefono: error }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.nombre.trim() || !formData.apellido.trim()) {
-      alert('Nombre y apellido son obligatorios');
+    setMensaje('');
+    setDniError('');
+    setTelefonoError('');
+    if (!nombre || !apellido) {
+      setMensaje('Por favor, completa todos los campos obligatorios.');
       return;
     }
-
-    // Validar DNI y teléfono
-    const dniError = validateDNI(formData.dni);
-    const telefonoError = validateTelefono(formData.telefono);
-    
-    if (dniError || telefonoError) {
-      setErrors({ dni: dniError, telefono: telefonoError });
+    if (dni && !/^\d{8}$/.test(dni)) {
+      setDniError('El DNI debe tener exactamente 8 números.');
       return;
     }
-
-    // Check for duplicates
-    const normalizedName = formData.nombre.toLowerCase().trim();
-    const normalizedSurname = formData.apellido.toLowerCase().trim();
-    
-    const isDuplicate = existingStudents.some(student =>
-      student.nombre.toLowerCase().trim() === normalizedName &&
-      student.apellido.toLowerCase().trim() === normalizedSurname
-    );
-
-    if (isDuplicate) {
-      alert('Este estudiante ya existe en la lista');
+    if (telefono && !/^\d{9}$/.test(telefono)) {
+      setTelefonoError('El teléfono debe tener exactamente 9 números.');
       return;
     }
-
-    // Limpiar y formatear los datos
-    const cleanDNI = formData.dni.replace(/\D/g, '');
-    const cleanTelefono = formData.telefono.replace(/\D/g, '');
-
-    const newStudent: Omit<Student, 'id' | 'fechaCreacion'> = {
-      nombre: formData.nombre.trim(),
-      apellido: formData.apellido.trim(),
-      dni: cleanDNI || undefined,
-      telefono: cleanTelefono || undefined,
-      presente: true, // Always mark as present when added manually
-      esManual: true
-    };
-
-    onAddStudent(newStudent);
-    setFormData({ nombre: '', apellido: '', dni: '', telefono: '' });
-    setErrors({ dni: '', telefono: '' });
-    setShowForm(false);
-  };
-
-  const handleCancel = () => {
-    setFormData({ nombre: '', apellido: '', dni: '', telefono: '' });
-    setErrors({ dni: '', telefono: '' });
-    setShowForm(false);
+    setLoading(true);
+    try {
+      const { data: listaEstudiantes } = await supabase
+        .from('lista_estudiantes')
+        .select('id, estudiante_id, estudiantes:estudiante_id (nombres, apellidos)')
+        .eq('lista_id', listaId);
+      const existe = listaEstudiantes?.some((le: any) =>
+        le.estudiantes?.nombres?.trim().toLowerCase() === nombre.trim().toLowerCase() &&
+        le.estudiantes?.apellidos?.trim().toLowerCase() === apellido.trim().toLowerCase()
+      );
+      if (existe) {
+        setMensaje('Este estudiante ya está en la lista.');
+        setLoading(false);
+        return;
+      }
+      const user = (await supabase.auth.getUser()).data.user;
+      // No agregar optimista, solo insertar en BD
+      const { data: existing } = await supabase
+        .from('estudiantes')
+        .select('id')
+        .eq('nombres', nombre)
+        .eq('apellidos', apellido)
+        .maybeSingle();
+      let estudianteId = existing?.id;
+      if (!estudianteId) {
+        const { data: inserted } = await supabase
+          .from('estudiantes')
+          .insert({ nombres: nombre, apellidos: apellido, dni, telefono })
+          .select()
+          .maybeSingle();
+        if (inserted) {
+          estudianteId = inserted.id;
+        }
+      }
+      if (estudianteId) {
+        const { error } = await supabase.from('lista_estudiantes').insert({
+          lista_id: listaId,
+          estudiante_id: estudianteId,
+          origen: 'Manual',
+          presente: true,
+          marcado_por: user?.email || user?.id
+        });
+        if (!error) {
+          setMensaje('¡Estudiante agregado exitosamente!');
+          setNombre('');
+          setApellido('');
+          setDni('');
+          setTelefono('');
+          if (onStudentAdded) onStudentAdded(); // Forzar fetch inmediato
+        } else {
+          setMensaje('Error al asociar el estudiante a la lista. Puedes reintentar desde la lista.');
+        }
+      } else {
+        setMensaje('Error al agregar estudiante. Puedes reintentar desde la lista.');
+      }
+    } catch (err) {
+      setMensaje('Error inesperado. Puedes reintentar desde la lista.');
+    }
+    setLoading(false);
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <UserPlus className="w-6 h-6 mr-2 text-red-800" />
-          Agregar Estudiante Manualmente
-        </h2>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-gradient-to-r from-red-800 to-red-900 text-white px-6 py-2 rounded-lg hover:from-red-900 hover:to-red-950 transition-all duration-200 flex items-center font-medium shadow-lg"
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Agregar Estudiante
-          </button>
-        )}
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">Nombres <span className="text-red-600">*</span></label>
+        <input
+          type="text"
+          value={nombre}
+          onChange={e => setNombre(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-700 text-base"
+          placeholder="Nombres"
+          required
+        />
       </div>
-
-      {showForm && (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-                Nombres <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="nombre"
-                value={formData.nombre}
-                onChange={(e) => handleInputChange('nombre', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                required
-                placeholder="Ingresa los nombres"
-              />
-            </div>
-            <div>
-              <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-1">
-                Apellidos <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="apellido"
-                value={formData.apellido}
-                onChange={(e) => handleInputChange('apellido', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                required
-                placeholder="Ingresa los apellidos"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
-                DNI <span className="text-gray-500">(opcional - 8 dígitos)</span>
-              </label>
-              <input
-                type="text"
-                id="dni"
-                value={formData.dni}
-                onChange={(e) => handleInputChange('dni', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                  errors.dni 
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
-                }`}
-                placeholder="12345678"
-                maxLength={8}
-              />
-              {errors.dni && (
-                <div className="flex items-center mt-1 text-red-600 text-sm">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  {errors.dni}
-                </div>
-              )}
-            </div>
-            <div>
-              <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">
-                Teléfono <span className="text-gray-500">(opcional - 9 dígitos)</span>
-              </label>
-              <input
-                type="tel"
-                id="telefono"
-                value={formData.telefono}
-                onChange={(e) => handleInputChange('telefono', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                  errors.telefono 
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
-                }`}
-                placeholder="987654321"
-                maxLength={9}
-              />
-              {errors.telefono && (
-                <div className="flex items-center mt-1 text-red-600 text-sm">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  {errors.telefono}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-2" />
-              <div className="text-sm text-red-800">
-                <p className="font-semibold mb-1">Información importante:</p>
-                <ul className="space-y-1">
-                  <li>• El estudiante será marcado automáticamente como <strong>presente</strong></li>
-                  <li>• El DNI debe tener exactamente 8 dígitos numéricos</li>
-                  <li>• El teléfono debe tener exactamente 9 dígitos numéricos</li>
-                  <li>• Ambos campos son opcionales pero deben cumplir el formato si se llenan</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex space-x-3 pt-2">
-            <button
-              type="submit"
-              disabled={!!errors.dni || !!errors.telefono}
-              className={`flex-1 flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                errors.dni || errors.telefono
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-red-800 to-red-900 text-white hover:from-red-900 hover:to-red-950 shadow-lg'
-              }`}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Agregar Estudiante
-            </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center font-medium"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancelar
-            </button>
-          </div>
-        </form>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">Apellidos <span className="text-red-600">*</span></label>
+        <input
+          type="text"
+          value={apellido}
+          onChange={e => setApellido(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-700 text-base"
+          placeholder="Apellidos"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">DNI (opcional - 8 dígitos)</label>
+        <input
+          type="text"
+          value={dni}
+          onChange={e => {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            setDni(val);
+            setDniError('');
+          }}
+          maxLength={8}
+          className={`w-full border ${dniError ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-700 text-base`}
+          placeholder="DNI"
+        />
+        {dniError && <div className="text-red-600 text-xs mt-1">{dniError}</div>}
+      </div>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono (opcional - 9 dígitos)</label>
+        <input
+          type="text"
+          value={telefono}
+          onChange={e => {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            setTelefono(val);
+            setTelefonoError('');
+          }}
+          maxLength={9}
+          className={`w-full border ${telefonoError ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-700 text-base`}
+          placeholder="Teléfono"
+        />
+        {telefonoError && <div className="text-red-600 text-xs mt-1">{telefonoError}</div>}
+      </div>
+      <button
+        type="submit"
+        className={`bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-900 transition-all duration-200 w-full font-semibold flex items-center justify-center gap-2 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+        disabled={loading}
+      >
+        {loading ? 'Agregando...' : 'Agregar estudiante'}
+      </button>
+      {mensaje && (
+        <div className={`text-center mt-2 ${mensaje.includes('exitosamente') ? 'text-green-700 font-semibold' : 'text-red-600'}`}>{mensaje}</div>
       )}
-
-      {!showForm && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-2" />
-            <div className="text-sm text-red-800">
-              <p className="font-semibold mb-1">Agregar estudiantes manualmente:</p>
-              <ul className="space-y-1">
-                <li>• Ideal para estudiantes que no están en el archivo Excel</li>
-                <li>• Se marcan automáticamente como presentes</li>
-                <li>• DNI: exactamente 8 dígitos (opcional)</li>
-                <li>• Teléfono: exactamente 9 dígitos (opcional)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </form>
   );
 };
 

@@ -100,8 +100,8 @@ export const processExcelFile = (file: File): Promise<{ students: Student[], dup
         // Convert to Student objects (manteniendo el orden original)
         const students: Student[] = excelData.map((data, index) => ({
           id: `excel_${Date.now()}_${index}`,
-          nombre: data.nombre,
-          apellido: data.apellido,
+          nombres: data.nombre,      // CAMBIO: nombres
+          apellidos: data.apellido,  // CAMBIO: apellidos
           presente: false,
           esManual: false,
           fechaCreacion: new Date(),

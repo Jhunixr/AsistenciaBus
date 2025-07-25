@@ -1,14 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, Info } from 'lucide-react';
-import { Student } from '../types';
+import { supabase } from '../utils/supabaseClient';
 import { processExcelFile, validateExcelFile } from '../utils/excelUtils';
+import toast from 'react-hot-toast';
 
 interface ExcelUploadProps {
-  onStudentsLoaded: (students: Student[], duplicatesFound: number) => void;
+  listaId: string;
+  onStudentsLoaded?: (count: number) => void;
   disabled?: boolean;
+  onAddExcelStudents?: (students: any[]) => void;
+  onExcelImportComplete?: () => void;
 }
 
-const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = false }) => {
+const ExcelUpload: React.FC<ExcelUploadProps> = ({ listaId, onStudentsLoaded, disabled = false, onAddExcelStudents, onExcelImportComplete }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -16,16 +20,62 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
   const handleFileSelect = async (file: File) => {
     const validationError = validateExcelFile(file);
     if (validationError) {
-      alert(validationError);
+      toast.error(validationError);
       return;
     }
 
     setIsProcessing(true);
     try {
-      const { students, duplicatesFound } = await processExcelFile(file);
-      onStudentsLoaded(students, duplicatesFound);
+      const { students } = await processExcelFile(file);
+      // Llamar a onAddExcelStudents para mostrar optimista
+      if (onAddExcelStudents) onAddExcelStudents(students);
+      // Emitir evento optimista ANTES de cualquier llamada a Supabase
+      if (window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('excel-students-optimistic', { detail: { students } }));
+      }
+      // Guardar estudiantes optimistas en localStorage
+      localStorage.setItem(`optimisticStudents_${listaId}`, JSON.stringify(students));
+      if (onStudentsLoaded) onStudentsLoaded(students.length);
+
+      // Buscar todos los estudiantes existentes en un solo query
+      const nombres = students.map(s => s.nombres);
+      const apellidos = students.map(s => s.apellidos);
+      const { data: existentes } = await supabase
+        .from('estudiantes')
+        .select('id, nombres, apellidos')
+        .in('nombres', nombres)
+        .in('apellidos', apellidos);
+      // Mapear estudiantes existentes
+      const estudiantesMap: Record<string, string> = {};
+      (existentes || []).forEach((e: any) => {
+        estudiantesMap[`${e.nombres}|${e.apellidos}`] = e.id;
+      });
+      // Insertar solo los nuevos
+      const nuevos = students.filter(s => !estudiantesMap[`${s.nombres}|${s.apellidos}`]);
+      let nuevosIds: string[] = [];
+      if (nuevos.length > 0) {
+        const { data: insertados } = await supabase
+          .from('estudiantes')
+          .insert(nuevos.map(s => ({ nombres: s.nombres, apellidos: s.apellidos })))
+          .select();
+        if (insertados) {
+          insertados.forEach((e: any, idx: number) => {
+            estudiantesMap[`${nuevos[idx].nombres}|${nuevos[idx].apellidos}`] = e.id;
+          });
+        }
+      }
+      // Insertar relaciones en lote
+      const relaciones = students.map((s: any) => ({
+        lista_id: listaId,
+        estudiante_id: estudiantesMap[`${s.nombres}|${s.apellidos}`],
+        origen: 'Excel',
+        presente: false
+      }));
+      await supabase.from('lista_estudiantes').insert(relaciones);
+      toast.success(`Se agregaron ${students.length} estudiantes a la lista.`);
+      if (onExcelImportComplete) onExcelImportComplete();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error procesando el archivo');
+      toast.error(error instanceof Error ? error.message : 'Error procesando el archivo');
     } finally {
       setIsProcessing(false);
     }
@@ -42,7 +92,6 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     const file = e.dataTransfer.files?.[0];
     if (file) {
       handleFileSelect(file);
@@ -60,107 +109,32 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onStudentsLoaded, disabled = 
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-        <FileSpreadsheet className="w-6 h-6 mr-2 text-red-800" />
-        Cargar Estudiantes desde Excel
-      </h2>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2">
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <p className="font-semibold mb-2">Formatos soportados:</p>
-                <div className="space-y-2">
-                  <div>
-                    <strong>Opción 1 - Una columna:</strong> Nombre completo (ej: "Juan Pérez García")
-                  </div>
-                  <div>
-                    <strong>Opción 2 - Dos columnas:</strong> Nombres | Apellidos
-                  </div>
-                  <div>
-                    <strong>Opción 3 - Cuatro columnas:</strong> Primer Nombre | Segundo Nombre | Primer Apellido | Segundo Apellido
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 mr-2 flex-shrink-0" />
-            <div className="text-sm text-orange-800">
-              <p className="font-semibold mb-1">Importante:</p>
-              <ul className="space-y-1">
-                <li>• Se mantiene el orden original del archivo</li>
-                <li>• Los duplicados se eliminan automáticamente</li>
-                <li>• Se ignoran las filas vacías</li>
-                <li>• Estudiantes marcados como ausentes por defecto</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+    <form className="space-y-4 max-w-lg mx-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200" onSubmit={e => e.preventDefault()}>
+      <div className="flex items-center gap-2 mb-2">
+        <FileSpreadsheet className="w-6 h-6 text-green-700" />
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800">Cargar estudiantes desde Excel</h2>
       </div>
-
-      <div
-        className={`
-          border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200
-          ${dragActive ? 'border-red-500 bg-red-50 scale-105' : 'border-gray-300'}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-400 hover:bg-red-50 hover:scale-105'}
-        `}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => !disabled && !isProcessing && fileInputRef.current?.click()}
-      >
+      <div className="flex flex-col items-center gap-2">
         <input
-          ref={fileInputRef}
           type="file"
-          accept=".xlsx,.xls,.csv"
+          accept=".xlsx"
+          ref={fileInputRef}
           onChange={handleFileInput}
-          className="hidden"
-          disabled={disabled || isProcessing}
+          className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-800 file:text-white hover:file:bg-red-900 cursor-pointer"
+          disabled={isProcessing || disabled}
         />
-
-        {isProcessing ? (
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-800 mb-4"></div>
-            <p className="text-lg font-medium text-gray-700">Procesando archivo...</p>
-            <p className="text-sm text-gray-500 mt-1">Analizando formato y cargando estudiantes</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <div className="bg-gradient-to-br from-red-800 to-red-600 p-4 rounded-full mb-4">
-              <Upload className="w-12 h-12 text-white" />
-            </div>
-            <p className="text-xl font-semibold text-gray-700 mb-2">
-              Arrastra tu archivo aquí o haz clic para seleccionar
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              Formatos soportados: .xlsx, .xls, .csv (máximo 10MB)
-            </p>
-            <div className="flex items-center space-x-4 text-xs text-gray-400">
-              <span>📊 Excel</span>
-              <span>📋 CSV</span>
-              <span>🔄 Auto-detección de formato</span>
-            </div>
-          </div>
-        )}
+        <button
+          type="button"
+          className={`bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-900 transition-all duration-200 w-full font-semibold flex items-center justify-center gap-2 ${isProcessing ? 'opacity-60 cursor-not-allowed' : ''}`}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isProcessing || disabled}
+        >
+          <FileSpreadsheet className="w-5 h-5" />
+          {isProcessing ? 'Procesando...' : 'Seleccionar archivo Excel'}
+        </button>
       </div>
-
-      <div className="mt-4 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-        <p><strong>Ejemplos de formatos válidos:</strong></p>
-        <ul className="mt-1 space-y-1">
-          <li>• <strong>1 columna:</strong> "María García López" → Nombre: María, Apellido: García López</li>
-          <li>• <strong>2 columnas:</strong> "María José" | "García López" → Nombre: María José, Apellido: García López</li>
-          <li>• <strong>4 columnas:</strong> "María" | "José" | "García" | "López" → Nombre: María José, Apellido: García López</li>
-        </ul>
-      </div>
-    </div>
+      <div className="text-xs text-gray-500">Solo se aceptan archivos .xlsx. El archivo debe tener columnas de nombres y apellidos.</div>
+    </form>
   );
 };
 
